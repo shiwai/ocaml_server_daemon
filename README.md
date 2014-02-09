@@ -1,8 +1,12 @@
-# OCaml_Server_Daemon
+# OCaml-Server-Daemon
 
 ## Dependencies
 - ocamlnet v3.7.3
 
-## How To Build
-` make server
-  ./server
+## How To Build & Run
+```
+# build
+make server
+# run
+./server
+```
