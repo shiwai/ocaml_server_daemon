@@ -8,16 +8,23 @@ let generate resp =
         new Netmime.basic_mime_header
             ["Content-type", "text/html"] in
     let data = 
-        "<html>" ^
-            "<head><title>Easy Daemon</title></head>\n" ^
-            "<body>\n" ^
-                Default_controller.getResponse ^
-            "</body>\n" ^
-        "</html>" in
+                Default_controller.getResponse() in
     resp # send (`Resp_status_line (200, "OK"));
     resp # send (`Resp_header h);
     resp # send (`Resp_body (data, 0, String.length data));
     resp # send `Resp_end
+;;
+
+let generate_error resp =
+    printf "Generating error response\n"; flush stdout;
+    let h = new Netmime.basic_mime_header ["Content-type", "text/html"] in
+    let data = "<html><head><title>Bad Request</title></head>\n" ^
+               "    <body>\nBad Requeest</body>\n" ^
+               "</html>" in
+    resp # send (`Resp_status_line (400, "Bad Request"));
+    resp # send (`Resp_header h);
+    resp # send (`Resp_body (data, 0, String.length data));
+    resp # send `Resp_end;
 ;;
 
 let serve fd = 
@@ -53,6 +60,18 @@ let serve fd =
                     | None -> assert false
                 );
                 cur_resp := None
+            | `Fatal_error e ->
+                let name = Nethttpd_kernel.string_of_fatal_error e in
+                printf "Fatal_error: %s\n" name;
+                flush stdout;
+            | `Bad_request_error (e, resp) ->
+                let name = Nethttpd_kernel.string_of_bad_request_error e in
+                printf "Bad Request error: %s\n" name;
+                flush stdout;
+                generate_error resp
+            | `Timeout ->
+                printf "Timeout\n";
+                flush stdout;
             | _ -> ()
         );
         cur_tok := next_token()
@@ -94,6 +113,28 @@ let start() =
             Unix.Unix_error(Unix.EINTR,_,_) -> ()
         done
     ;;
+
+let conf_debug() = 
+    let debug = try Sys.getenv "DEBUG" with Not_found -> "" in
+    if debug = "All" then
+        Netlog.Debug.enable_all()
+    else if debug = "LIST" then (
+        List.iter print_endline (Netlog.Debug.names());
+        exit 0
+    )
+    else (
+        let l = Netstring_str.split (Netstring_str.regexp "[\t\r\n]+") debug in
+        List.iter (fun m -> Netlog.Debug.enable_module m) l
+    );
+    if (try ignore(Sys.getenv "DEBUG_WIN32"); true with Not_found -> false) then
+        Netsys_win32.Debug.debug_c_wrapper true
+;;
+
+Netsys_signal.init();
+conf_debug();
+start();
+
+
 
 Netsys_signal.init();
 start();;
