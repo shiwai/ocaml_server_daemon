@@ -15,7 +15,9 @@ let gen_from_file filename =
             read_contents inbff (answer ^ "\n" ^ str)
         with 
             End_of_file -> answer in
-    read_contents fin ""
+    let content = read_contents fin "" in
+    close_in fin;
+    content;;
 
 
 (* Create Response Text. *)
@@ -23,9 +25,11 @@ let getResponse() =
     let str = gen_from_file "./static/html/index.html" in
     printf "%s\n" str;
     str
-(*
-    let source = generate_list 100 in
-    let stringSource = List.map (fun x -> string_of_int x) source in
-    let paragraphs = List.map (fun x -> "<p>" ^ x ^ " times" ^ "</p>") stringSource in
-    List.fold_left (fun x y -> x ^ y) "start..." paragraphs
-*)
+
+let handleData req = 
+    let uri = snd req in
+    try
+        let str = gen_from_file ("./static" ^ uri) in
+        (200, str)
+    with
+    | _ -> (404, "")
