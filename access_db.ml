@@ -36,3 +36,21 @@ let getApiTodos() =
     let data = using_mongo (fun db -> find_data db) in
     let sts = List.map (fun x -> easy_json_converter x) data in
     json_arr_converter sts;;
+
+(* Example, Insert Data to DB *)
+let insertApiTodos(name, value) =
+    printf "name=%s, value=%s\n" name value;
+    let bsonBase = Bson.empty in
+    let name_element = Bson.create_string name in
+    let value_element = Bson.create_string value in
+    let added_name = Bson.add_element "name" name_element bsonBase in
+    let added_name_and_value = Bson.add_element "value" value_element added_name in
+    try
+        using_mongo (fun db -> Mongo.insert db [added_name_and_value]);
+        (201, "Created")
+    with
+    | Mongo_failed error ->
+        printf "%s\n" error;
+        (400, "Bad Request")
+    | _ -> (400, "Bad Request")
+

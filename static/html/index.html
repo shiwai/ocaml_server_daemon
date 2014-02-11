@@ -35,19 +35,21 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>dummy</td>
-                    <td>dummy value</td>
-                    <td>not yet</td>
-                </tr>
+                <!-- Append Here -->
             </tbody>
             </table>
             </div>
 
             <h2>Request</h2>
+            <p>Add or Refresh Task information.</p>
+            <div class="input-group">
+                <input type="TEXT" class="form-control" id="task_name">
+                <span class="help-block">please input a task name.</span>
+                <input type="TEXT" class="form-control" id="task_desc">
+                <span class="help-block">please input a task description.</span>
+            </div>
             <button type="button" id="get_todo" class="btn btn-primary btn-square">GET</button>
-            <button type="button" class="btn btn-info btn-square">POST</button>
+            <button type="button" id="post_todo" class="btn btn-info btn-square">POST</button>
         </div>
 
         <script src="//code.jquery.com/jquery.js"></script>

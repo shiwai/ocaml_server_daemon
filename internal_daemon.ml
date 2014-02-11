@@ -11,16 +11,16 @@ let genarate_content_type uri =
     | _ -> "text/plain"
 
 let generate_status status_code =
-    let types = [(200,"OK");(404,"Not Found")] in
+    let types = [(200,"OK");(201,"Created");(400,"Bad Request");(404,"Not Found")] in
     try
         List.find (fun x -> (fst x) = status_code) types
     with
     | _ -> (200, "OK")
 
-let generate_gen req resp =
+let generate_gen req req_content resp =
     printf "Gererating general response\n"; flush stdout;
     let h = new Netmime.basic_mime_header ["Content-type", (genarate_content_type (snd req))] in
-    let code,data = Default_controller.handleData req in
+    let code,data = Default_controller.handleData req req_content in
     resp # send (`Resp_status_line (generate_status code));
     resp # send (`Resp_header h);
     resp # send (`Resp_body (data, 0, String.length data));
@@ -45,8 +45,6 @@ let serve fd =
     let proto = new Nethttpd_kernel.http_protocol config fd in
 
     let rec next_token () =
-        (* debug *)
-        printf "wait next token...\n"; flush stdout;
         if proto # recv_queue_len = 0 then (
             proto # cycle ~block:(0.1) ();
             next_token()
@@ -57,9 +55,9 @@ let serve fd =
 
     let cur_reqs = ref None in
     let cur_tok = ref (next_token()) in
+    let cur_chunk = ref "" in
     let cur_resp = ref None in
     while !cur_tok <> `Eof do
-        printf "loop token...\n"; flush stdout;
         (match !cur_tok with
             | `Req_header (((meth, uri), v), hdr, resp) ->
                 printf "request: method = %s, uri = %s\n" meth uri;
@@ -76,13 +74,16 @@ let serve fd =
                 (match !cur_resp with
                     | Some resp -> 
                         (match !cur_reqs with
-                            | Some reqs -> generate_gen reqs resp
+                            | Some reqs -> generate_gen reqs !cur_chunk resp
                             | None -> assert false
                         );
                     | None -> assert false
                 );
                 cur_resp := None
             | `Req_body data_chunk ->
+                let ch, pos, len = data_chunk in
+                printf "chunk recieved, %s\n" ch; flush stdout;
+                cur_chunk := (!cur_chunk ^ ch);
                 ()
             | `Fatal_error e ->
                 let name = Nethttpd_kernel.string_of_fatal_error e in

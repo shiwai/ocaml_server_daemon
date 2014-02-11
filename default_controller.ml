@@ -25,19 +25,30 @@ let gen_from_file filename =
 
 
 (* Definition API Handles *)
-let api_handler req =
-    let uri = snd req in
+let api_handler req content =
+    printf "%s\n" content;
+    let mtd,uri=req in
     match uri with
     | "/api/todos" -> 
-        let response = Access_db.getApiTodos() in
-        (200, response)
+        if mtd = "GET" then
+            let response = Access_db.getApiTodos() in
+            (200, response)
+        else
+            match content with
+            | "" -> (400, "Bad Request")
+            | _ ->
+                try 
+                    let key, value = Utils.parseString content in
+                    Access_db.insertApiTodos(key, value)
+                with
+                | _ -> (400, "Bad Request")
     | _ -> (404, "Not Found")
-
+   
 (* Handle All Requests *)
-let handleData req = 
+let handleData req content = 
     let uri = snd req in
     if Utils.isApiCall uri then
-        api_handler req
+        api_handler req content
     else
         try
             let str = gen_from_file ("./static" ^ uri) in

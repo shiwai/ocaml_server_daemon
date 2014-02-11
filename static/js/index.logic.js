@@ -5,7 +5,22 @@ function get_todos() {
         }).done(function(data) {
             current_todos = JSON.parse(data);
             refresh_todo_view(current_todos);
-            })
+        })
+}
+
+function insert_todos(name, value) {
+    // Use Ajax to Insert Todo data
+    $.ajax({
+        url: "/api/todos",
+        type: "post",
+        data: {
+            "name":name,
+            "value":value
+             }
+        }).done(function(res) {
+            console.log(res);
+            get_todos();
+        })
 }
 
 function refresh_todo_view (new_todos) {
@@ -21,4 +36,18 @@ function refresh_todo_view (new_todos) {
     }
     $todos.append(html);
 }
+
 $('#get_todo').on('click', get_todos);
+$('#post_todo').on('click', function(){
+    $name_box = $("#task_name");
+    $desc_box = $("#task_desc");
+    var name = $name_box.val();
+    var desc = $desc_box.val();
+    insert_todos(name, desc);
+    // initialize
+    $name_box.val("");
+    $desc_box.val("");
+    });
+
+// Initial Display
+get_todos();
