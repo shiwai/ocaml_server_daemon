@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
     <head>
-        <title>Ocaml Server</title>
+        <title>Todo Server OCaml</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="../bootstrap/bootstrap/bootstrap.min.css" rel="stylesheet" media="screen">
         <link href="../bootstrap/css/font-awesome.min.css" rel="stylesheet" media="screen">
@@ -12,15 +12,46 @@
     <body>
         <header class="navbar navbar-inverse navbar-static-top" role="navigation">
             <div class="navbar-header">
-                <a class="navbar-brand" href="#">OCaml Example</a>
+                <a class="navbar-brand" href="#">Todo OCaml</a>
             </div>
         </header>
         <div class="container">
-            <h1>Header</h1>
-            <p>Hello, myself</p>
+            <div class="page-header">
+                <h1>Todo Written By OCaml</h1>
+            </div>
+            <h2>Descriptions</h2>
+            <p>This page is written for my OCaml studies.</p>
+
+            <h2>Todos</h2>
+            <p>Get Todos From Server.</p>
+            <div id="todos">
+            <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Check</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>dummy</td>
+                    <td>dummy value</td>
+                    <td>not yet</td>
+                </tr>
+            </tbody>
+            </table>
+            </div>
+
+            <h2>Request</h2>
+            <button type="button" id="get_todo" class="btn btn-primary btn-square">GET</button>
+            <button type="button" class="btn btn-info btn-square">POST</button>
         </div>
 
         <script src="//code.jquery.com/jquery.js"></script>
         <script src="../bootstrap/js/bootstrap.min.js"></script>
+        <script src="../js/index.logic.js"></script>
     </body>
 </html>

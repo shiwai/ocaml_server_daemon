@@ -17,20 +17,6 @@ let generate_status status_code =
     with
     | _ -> (200, "OK")
 
-let generate resp = 
-    printf "Generating response\n"; flush stdout;
-
-    let h = 
-        new Netmime.basic_mime_header
-            ["Content-type", "text/html"] in
-    let data = 
-                Default_controller.getResponse() in
-    resp # send (`Resp_status_line (200, "OK"));
-    resp # send (`Resp_header h);
-    resp # send (`Resp_body (data, 0, String.length data));
-    resp # send `Resp_end
-;;
-
 let generate_gen req resp =
     printf "Gererating general response\n"; flush stdout;
     let h = new Netmime.basic_mime_header ["Content-type", (genarate_content_type (snd req))] in
@@ -59,10 +45,10 @@ let serve fd =
     let proto = new Nethttpd_kernel.http_protocol config fd in
 
     let rec next_token () =
+        (* debug *)
         printf "wait next token...\n"; flush stdout;
         if proto # recv_queue_len = 0 then (
             proto # cycle ~block:(0.1) ();
-            proto # cycle ();
             next_token()
         )
         else
@@ -90,9 +76,9 @@ let serve fd =
                 (match !cur_resp with
                     | Some resp -> 
                         (match !cur_reqs with
-                        | Some reqs -> 
-                            generate_gen reqs resp (* generate resp *)
-                        | None -> assert false);
+                            | Some reqs -> generate_gen reqs resp
+                            | None -> assert false
+                        );
                     | None -> assert false
                 );
                 cur_resp := None
@@ -178,8 +164,3 @@ let conf_debug() =
 Netsys_signal.init();
 conf_debug();
 start();
-
-
-
-Netsys_signal.init();
-start();;
